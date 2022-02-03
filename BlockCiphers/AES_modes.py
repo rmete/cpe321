@@ -7,11 +7,11 @@ def main(in_file_path):
     with open(in_file_path, mode='rb') as in_file:
         file_bytes = in_file.read()
         blocks = get_blocks(file_bytes)
-        print(blocks)
-        # key = get_random_bytes(16)
-        # iv = get_random_bytes(16)
-        # cipher = AES.new(key, AES.MODE_ECB)
-        # out_file = CBC_encrypt(in_file_path, get_blocks(in_file), cipher, iv)
+        # print(blocks)
+        key = get_random_bytes(16)
+        iv = get_random_bytes(16)
+        cipher = AES.new(key, AES.MODE_ECB)
+        out_file = CBC_encrypt(in_file_path, get_blocks(in_file), cipher, iv)
 
 
 def pkcs7_pad(to_pad, m):
