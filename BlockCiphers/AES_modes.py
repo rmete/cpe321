@@ -19,6 +19,7 @@ def xor_bytes(a, b):
     c = bytearray()
     for (byte_a, byte_b) in (a, b):
         c.append(byte_a ^ byte_b)
+    return c
 
 
 def CBC_encrypt(in_file_path, blocks, cipher, iv):
