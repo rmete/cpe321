@@ -13,14 +13,9 @@ def main(in_file_path):
         key = get_random_bytes(16)
         iv = get_random_bytes(16)
         # According to docs we have to create new cipher object for each encryption/decryption
-        cbc_cipher = AES.new(key, AES.MODE_ECB)
-        out_file = CBC_encrypt(in_file_path, blocks, cbc_cipher, iv)
 
-        with open(out_file, mode='rb') as to_cbc_decrypt:
-            cbc_decrypt_cipher = AES.new(key, AES.MODE_ECB)
-            CBC_decrypt(out_file, get_blocks(to_cbc_decrypt.read()), cbc_decrypt_cipher, iv)
-
-
+        out_bytes = CBC_encrypt(blocks, iv)
+        print(CBC_decrypt(out_bytes, iv))
 
 
 def pkcs7_pad(to_pad, m):
@@ -42,23 +37,24 @@ def xor_bytes(a, b):
     return c
 
 
-def CBC_encrypt(in_file_path, blocks, cipher, iv):
-    out_file_path = in_file_path + ".encrypt.txt"
-    with open(out_file_path, mode='wb') as out_file:
-        for bytes_16 in blocks:
-            intermediate = xor_bytes(iv, bytes_16)
-            iv = cipher.encrypt(intermediate)
-            out_file.write(iv)
-    return out_file_path
+def CBC_encrypt(blocks, iv):
+    cipher = AES.new(key, AES.MODE_ECB)
+    encrypted = bytearray()
+    for bytes_16 in blocks:
+        intermediate = xor_bytes(iv, bytes_16)
+        iv = cipher.encrypt(intermediate)
+        encrypted.push(iv)
+    return encrypted
 
-def CBC_decrypt(in_file_path, blocks, cipher, iv):
-    out_file_path = in_file_path + ".decrypt.txt"
-    with open(out_file_path, mode='wb') as out_file:
-        for bytes_16 in blocks:
-            intermediate = cipher.decrypt(bytes_16)
-            out_file.write(xor_bytes(iv, intermediate))
-            iv = bytes_16
-    return out_file_path
+
+def CBC_decrypt(blocks, iv):
+    cipher = AES.new(key, AES.MODE_ECB)
+    decrypted = bytearray()
+    for bytes_16 in blocks:
+        intermediate = cipher.decrypt(bytes_16)
+        decrypted.push(xor_bytes(iv, intermediate))
+        iv = bytes_16
+    return decrypted
 
 
 
