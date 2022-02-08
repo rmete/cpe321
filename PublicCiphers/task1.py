@@ -1,5 +1,7 @@
 from Crypto.Util.number import getPrime
 from Crypto.Hash import SHA256
+from Crypto.Cipher import AES
+from Crypto.Cipher import AES
 
 
 def main():
@@ -26,6 +28,16 @@ def main():
     bob_key = Bob_hasher.digest()
 
     print(f"Bob's key {alice_key}\nAlice's key {bob_key}\n")
+    Alice_msg = "Hi Bob, i'm Alice"
+    print(f"Alice: {Alice_msg}")
+    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC)
+    Alice_sends_to_Bob = Alice_encrypter.encrypt(Alice_msg)
+
+    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC)
+    Bob_received_from_Alice = Bob_encrypter.decrypt(Alice_sends_to_Bob)
+    print(f"Bob received: {Bob_received_from_Alice}")
+
+
 
 if __name__ == "__main__":
     main()
