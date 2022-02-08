@@ -1,4 +1,6 @@
 from Crypto.Util.number import getPrime
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 from Crypto.Cipher import AES
@@ -27,15 +29,17 @@ def main():
     Bob_hasher.update(Bob_shared_secret)
     bob_key = Bob_hasher.digest()
 
+    iv = get_random_bytes(16)
+
     print(f"Bob's key {alice_key}\nAlice's key {bob_key}\n")
-    Alice_msg = "Hi Bob, i'm Alice"
-    print(f"Alice: {Alice_msg}")
-    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC)
+    Alice_msg = pad(bytes("Hi Bob, i'm Alice", "ascii"), 16)
+    print(f"Alice: {unpad(Alice_msg, 16)}")
+    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC, iv=iv)
     Alice_sends_to_Bob = Alice_encrypter.encrypt(Alice_msg)
 
-    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC)
+    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC, iv=iv)
     Bob_received_from_Alice = Bob_encrypter.decrypt(Alice_sends_to_Bob)
-    print(f"Bob received: {Bob_received_from_Alice}")
+    print(f"Bob received: {unpad(Bob_received_from_Alice, 16)}")
 
 
 
