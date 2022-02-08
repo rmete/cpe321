@@ -1,45 +1,95 @@
 from Crypto.Cipher import AES
 import sys
-from os import urandom
+from Crypto.Random import get_random_bytes
 
 
-def main():
-    infile = sys.argv[1]
+def main(infile):
+    #infile = sys.argv[1]
     with open(infile, 'rb') as input:
         plaintext = input.read()
+
+    # Preserve header and get bytes for the image
     header = plaintext[:54]
     image = plaintext[54:]
-    blocks = get_blocks(image)
-    EBC_encrypt(infile, blocks, header)
 
-# Breakup plaintext into blocks of length 16
-# Pad last block if needed with 0s and 1s
-def get_blocks(plaintext):
-    blocks = []
-    for i in range(0, len(plaintext), 16):
-        block = plaintext[i : i + 16]
-        if (len(block) < 16):
-            for j in range(16 - len(block)):
-                block + "0" if j % 2 == 0 else "1"
-        blocks.append(block)
+    # Break up image into 16 byte block
+    blocks = get_blocks(image)
+
+    key = get_random_bytes(16)
+    iv = get_random_bytes(16)
+
+    # Encrypt with ebc and cbc method
+    ebc_out_bytes = EBC_encrypt(blocks)
+    cbc_out_bytes = CBC_encrypt(blocks, key, iv)
+
+    # # Decrypt with cbc method
+    # cbc_decrypt = CBC_decrypt(cbc_out_bytes, key, iv)
+
+    # Write ebc encrypted file
+    outfile_ebc = infile.split(".")[0] + "_ebc.bmp"
+    write_file(outfile_ebc, header, ebc_out_bytes)
+
+    # Write cbc encrypted file
+    outfile_cbc = infile.split(".")[0] + "_cbc.bmp"
+    write_file(outfile_cbc, header, cbc_out_bytes)
+
+    # # Write cbc decrypted file
+    # outfile_cbc_decypted = infile.split(".")[0] + "_decrypted_cbc.bmp"
+    # write_file(outfile_cbc_decypted, header, cbc_decrypt)
+
+    
+
+def pkcs7_pad(to_pad, m):
+    if len(to_pad) % m != 0:
+        pad_with = (m * (len(to_pad) // m + 1)) - len(to_pad)
+        to_pad = to_pad + bytes([pad_with] * pad_with)
+    return to_pad
+
+def get_blocks(file_as_bytes):
+    file_as_bytes = pkcs7_pad(file_as_bytes, 16)
+    blocks = [bytes(file_as_bytes[x - 16: x]) for x in range(16, len(file_as_bytes) + 1, 16)]
     return blocks
 
-def EBC_encrypt(infile, blocks, header):
-    # get the name of file without extension and 
-    outfile = infile.split(".")[0] + "_ebc.bmp"
+def EBC_encrypt(blocks):
     ciphertext = b""
-    random_key = urandom(16)
-    ecb_cipher = AES.new(random_key)
+    random_key = get_random_bytes(16)
+    ecb_cipher = AES.new(random_key, AES.MODE_ECB)
 
     # loop through blocks and encrypt each block independently 
     for block in blocks:
         ciphertext += ecb_cipher.encrypt(block)
+    
+    return ciphertext
 
+def xor_bytes(a, b):
+    c = bytearray()
+    for idx in range(16):
+        c.append(a[idx] ^ b[idx])
+    return c
+
+def CBC_encrypt(blocks, key, iv):
+    cipher = AES.new(key, AES.MODE_ECB)
+    encrypted = bytearray()
+    for bytes_16 in blocks:
+        intermediate = xor_bytes(iv, bytes_16)
+        iv = cipher.encrypt(intermediate)
+        encrypted += iv
+    return encrypted
+
+def CBC_decrypt(blocks, key, iv):
+    cipher = AES.new(key, AES.MODE_ECB)
+    decrypted = bytearray()
+    for bytes_16 in blocks:
+        intermediate = cipher.decrypt(bytes_16)
+        decrypted += xor_bytes(iv, intermediate)
+        iv = bytes_16
+    return decrypted
+
+def write_file(outfile, header, ciphertext):
     # Write to output file, for this we need the original bmp header 
     # and the encrypted ciphertext
     with open(outfile, "wb") as output:
         output.write(header+ciphertext)
 
-
 if __name__ == "__main__":
-    main(sys.argv[0])
+    main(sys.argv[1])
