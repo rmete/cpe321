@@ -22,8 +22,10 @@ def main(infile):
     ebc_out_bytes = EBC_encrypt(blocks)
     cbc_out_bytes = CBC_encrypt(blocks, key, iv)
 
-    # # Decrypt with cbc method
-    # cbc_decrypt = CBC_decrypt(cbc_out_bytes, key, iv)
+    encrypted_blocks = get_blocks(cbc_out_bytes)
+
+    # Decrypt with cbc method
+    cbc_decrypt = CBC_decrypt(encrypted_blocks, key, iv)
 
     # Write ebc encrypted file
     outfile_ebc = infile.split(".")[0] + "_ebc.bmp"
@@ -33,9 +35,9 @@ def main(infile):
     outfile_cbc = infile.split(".")[0] + "_cbc.bmp"
     write_file(outfile_cbc, header, cbc_out_bytes)
 
-    # # Write cbc decrypted file
-    # outfile_cbc_decypted = infile.split(".")[0] + "_decrypted_cbc.bmp"
-    # write_file(outfile_cbc_decypted, header, cbc_decrypt)
+    # Write cbc decrypted file
+    outfile_cbc_decypted = infile.split(".")[0] + "_decrypted_cbc.bmp"
+    write_file(outfile_cbc_decypted, header, cbc_decrypt)
 
     
 
