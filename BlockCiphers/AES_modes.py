@@ -56,6 +56,22 @@ def CBC_decrypt(blocks, key, iv):
         iv = bytes_16
     return decrypted
 
+def EBC_encrypt(infile, blocks, header):
+    # get the name of file without extension and 
+    outfile = infile.split(".")[0] + "_ebc.bmp"
+    ciphertext = b""
+    random_key = urandom(16)
+    ecb_cipher = AES.new(random_key)
+
+    # loop through blocks and encrypt each block independently 
+    for block in blocks:
+        ciphertext += ecb_cipher.encrypt(block)
+
+    # Write to output file, for this we need the original bmp header 
+    # and the encrypted ciphertext
+    with open(outfile, "wb") as output:
+        output.write(header+ciphertext)
+
 
 
 if __name__ == "__main__":
