@@ -48,17 +48,17 @@ def main_1():
     print(f"Bob's key {alice_key}\nAlice's key {bob_key}\n")
     Alice_msg = pad(bytes("Hi Bob, i'm Alice", "ascii"), 16)
     print(f"Alice: {unpad(Alice_msg, 16)}")
-    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC, alice_key)   #using alice_key for iv
+    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC, iv)   #using alice_key for iv
     Alice_sends_to_Bob = Alice_encrypter.encrypt(Alice_msg)
 
-    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC, bob_key)       #using bob_key for iv
+    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC, iv)       #using bob_key for iv
     Bob_received_from_Alice = Bob_encrypter.decrypt(Alice_sends_to_Bob)
     print(f"Bob received: {unpad(Bob_received_from_Alice, 16)}")
 
     # Mallory swooping in
-    Mallory_encryptor = AES.new(mallory_key, AES.MODE_CBC, mallory_key)
+    Mallory_encryptor = AES.new(mallory_key, AES.MODE_CBC, iv)
     Mallory_stolen_from_Alice = Mallory_encryptor.decrypt(Alice_sends_to_Bob)
-    print(f"Bob received: {unpad(Mallory_stolen_from_Alice, 16)}")
+    print(f"Mallory Intercepted: {unpad(Mallory_stolen_from_Alice, 16)}")
 
 if __name__ == "__main__":
     main_1()
@@ -80,7 +80,7 @@ def main_2():
     # g = p # This means the public and secret will be 0
     # Mallory_stolen_secret = bytes(0)
 
-    # g = p - 1 # This means the public and secret will be p - 1 
+    # g = p - 1 # This means the public and secret will be p - 1
     # Mallory_stolen_secret = bytes(p-1) # Ex) (p = 7, g = p-1 = 6, prime=3) => 6^3 % 7 = 6 = (p-1)
 
     Alice_public = pow(g, Alice_prime) % p
@@ -89,7 +89,7 @@ def main_2():
     Alice_shared_secret = bytes(pow(Bob_public, Alice_prime) % p)
     Bob_shared_secret = bytes(pow(Alice_public, Bob_prime) % p)
 
-    # Mallory can now be sneaky 
+    # Mallory can now be sneaky
     Mallory_hasher = SHA256.new()
     Mallory_hasher.update(Mallory_stolen_secret)
     mallory_key = Mallory_hasher.digest()
@@ -109,17 +109,17 @@ def main_2():
     print(f"Bob's key {alice_key}\nAlice's key {bob_key}\n")
     Alice_msg = pad(bytes("Hi Bob, i'm Alice", "ascii"), 16)
     print(f"Alice: {unpad(Alice_msg, 16)}")
-    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC, alice_key)   #using alice_key for iv
+    Alice_encrypter = AES.new(alice_key, AES.MODE_CBC, iv)   #using alice_key for iv
     Alice_sends_to_Bob = Alice_encrypter.encrypt(Alice_msg)
 
-    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC, bob_key)       #using bob_key for iv
+    Bob_encrypter = AES.new(bob_key, AES.MODE_CBC, iv)       #using bob_key for iv
     Bob_received_from_Alice = Bob_encrypter.decrypt(Alice_sends_to_Bob)
     print(f"Bob received: {unpad(Bob_received_from_Alice, 16)}")
 
     # Mallory swooping in
-    Mallory_encryptor = AES.new(mallory_key, AES.MODE_CBC, mallory_key)
+    Mallory_encryptor = AES.new(mallory_key, AES.MODE_CBC, iv)
     Mallory_stolen_from_Alice = Mallory_encryptor.decrypt(Alice_sends_to_Bob)
-    print(f"Bob received: {unpad(Mallory_stolen_from_Alice, 16)}")
+    print(f"Mallory intercepted: {unpad(Mallory_stolen_from_Alice, 16)}")
 
 if __name__ == "__main__":
     main_2()
