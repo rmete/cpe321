@@ -75,14 +75,14 @@ def main_2():
     print(f"Bob's prime: {Bob_prime}")
 
     # Mallory's Modifications
-    g = 1 # This means the public will be 1 & secret will be 1
-    Mallory_stolen_secret = bytes(1)
+    # g = 1 # This means the public will be 1 & secret will be 1
+    # Mallory_stolen_secret = bytes(1)
 
     # g = p # This means the public and secret will be 0
     # Mallory_stolen_secret = bytes(0)
 
-    # g = p - 1 # This means the public and secret will be p - 1
-    # Mallory_stolen_secret = bytes(p-1) # Ex) (p = 7, g = p-1 = 6, prime=3) => 6^3 % 7 = 6 = (p-1)
+    g = p - 1 # This means the public and secret will be p - 1
+    Mallory_stolen_secret = bytes(p-1) # Ex) (p = 7, g = p-1 = 6, prime=3) => 6^3 % 7 = 6 = (p-1)
 
     Alice_public = pow(g, Alice_prime) % p
     Bob_public = pow(g, Bob_prime) % p
