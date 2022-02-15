@@ -46,6 +46,14 @@ def main():
     Alice_decrypts_bytes = Alice_decrypts.to_bytes(4, "big")
     print(f"Alice's decrypted message: {unpad(Alice_decrypts_bytes, 4).decode('ascii')}")
 
+    Mallory_key = pad(bytes("Mal", "ascii"), 4).hex()
+    print(f"if Mallory subsitutes her own key '{Mallory_key}' which is: {int(Mallory_key, 16)} for Bob's message")
+    Mallory_encrypts = pow(int(Mallory_key, 16), e, mod=n)
+    Alice_decrypts = pow(Mallory_encrypts, d, mod=n)
+    Alice_decrypts_bytes = Alice_decrypts.to_bytes(4, "big")
+    print(f"Allice receives {Alice_decrypts} and will decrypt the intercepted message to {unpad(Alice_decrypts_bytes, 4).decode('ascii')}")
+    print("Alice is now using Mallory's key")
+
 
 
 if __name__ == "__main__":
