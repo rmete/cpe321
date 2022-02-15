@@ -1,17 +1,8 @@
-<<<<<<< HEAD
-from Cryptodome.Util.number import getPrime
-from Cryptodome.Util.Padding import pad, unpad
-from Cryptodome.Random import get_random_bytes
-from Cryptodome.Hash import SHA256
-from Cryptodome.Cipher import AES
-
-=======
 from Crypto.Util.number import getPrime
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
->>>>>>> 3a7ba26ee787013a56f15f9d85dc04b3dc04d5d3
 
 
 def main():
