@@ -1,9 +1,9 @@
-from Crypto.Util.number import getPrime
-from Crypto.Util.number import GCD
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
-from Crypto.Hash import SHA256
-from Crypto.Cipher import AES
+from Cryptodome.Util.number import GCD
+from Cryptodome.Util.number import getPrime
+from Cryptodome.Util.Padding import pad, unpad
+from Cryptodome.Random import get_random_bytes
+from Cryptodome.Hash import SHA256
+from Cryptodome.Cipher import AES
 
 
 def modular_inverse(a, b):
@@ -58,3 +58,58 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def main1():
+    e = 65537       # Alice sends e
+    p = getPrime(24)
+    q = getPrime(16)
+    n = p * q       # Alice sends n
+
+    # Bob computes s, select s to be n -1 
+    bob_s = n -1
+
+    # Bob computes c using defined s from above and sends it back to Alice
+    c = (bob_s ** e) % n
+
+    # # Create a key for Bob using selected s value
+    # bob_hasher = SHA256.new(data = str(bob_s).encode())
+    # bob_key = bob_hasher.digest()[:16]
+
+    # Mallory modifies c 
+    # By setting c to 1, Mallory knows that Alice's key will also have to be 1
+    # Note: Mallory also knows the value of n and e
+    Mallory_c = 1
+
+    # Alice computes s using the modified c from Mallory
+    # Because c is now 1, Mallory knows that s will compute to be 1
+    L = (p - 1)*(q - 1) // GCD(p - 1, q - 1)
+    d = modular_inverse(e, L)[0]
+    s = (Mallory_c ** d) % n 
+
+    # Alice creates an encriptor
+    alice_hasher = SHA256.new()
+    alice_hasher.update(bytes(s))
+    alice_key = alice_hasher.digest()[:16]
+    alice_iv = alice_hasher.digest()[16:32]
+    alice_encrypter = AES.new(alice_key, AES.MODE_CBC, alice_iv)
+
+    # Alice sends encripted message c
+    alice_msg = pad(bytes("Hi Bob!", "ascii"), 16)
+    c0 = alice_encrypter.encrypt(alice_msg)
+
+    # Mallory swooping in again, knowing that s will be 1
+    # Because of this info, mallory can create their own key and encryption
+    # Mallory can now decrpyt messages as well as send them 
+    mallory_hasher = SHA256.new()
+    mallory_hasher.update(bytes(1))
+    mallory_key = mallory_hasher.digest()[:16]
+    mallory_iv = mallory_hasher.digest()[16:32]
+    mallory_encrypter = AES.new(mallory_key, AES.MODE_CBC, mallory_iv)
+    intercepted_msg = unpad(mallory_encrypter.decrypt(c0), 16).decode()
+    print(f"Mallory intercepted the message {intercepted_msg}")
+
+
+
+if __name__ == "__main__":
+    main1()
