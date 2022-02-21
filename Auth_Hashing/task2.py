@@ -15,7 +15,7 @@ def brute_force(name, hashed_pw):
 
 def main():
     threads = []
-    with open("shadow.txt", 'rb') as to_crack:
+    with open("shadow.txt") as to_crack:
         line = to_crack.readline().split(':')
         print(line)
         threads.append(threading.Thread(brute_force, (line[0], line[1])))
