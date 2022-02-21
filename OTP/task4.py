@@ -1,6 +1,5 @@
 from Cryptodome.Random import get_random_bytes
 from sys import *
-import base64
 
 
 def xor_bytes(a, b):
@@ -44,12 +43,8 @@ def main():
     ciphertext1 = xor_bytes(image1, key)
     ciphertext2 = xor_bytes(image2, key)
 
-    print(type(ciphertext1))
-
     # XOR both encrypted images together
     decrypted_ciphertext = xor_bytes(ciphertext1, ciphertext2)
-
-    print(type(decrypted_ciphertext))
 
     # Write the encrypted images to a file
     encrypted_file1 = in_file_path1.split(".")[0] + "_two_time_pad_encrypted.bmp"
