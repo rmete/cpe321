@@ -7,7 +7,7 @@ import threading
 
 def brute_force(name, hashed_pw):
     start = process_time()
-    for guess in words:
+    for guess in words.words():
         if checkpw(guess, hashed_pw):
             print(f"{name} found in: {process_time() - start}")
             return
@@ -15,10 +15,10 @@ def brute_force(name, hashed_pw):
 
 def main():
     threads = []
-    with open("shadow.txt") as to_crack:
+    with open("shadow.txt", 'r') as to_crack:
         line = to_crack.readline().split(':')
         print(line)
-        threads.append(threading.Thread(brute_force, (line[0], line[1])))
+        threads.append(threading.Thread(target=brute_force, args=(line[0], line[1])))
         threads[-1].run()
 
 
